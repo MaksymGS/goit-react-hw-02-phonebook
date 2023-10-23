@@ -1,31 +1,48 @@
-import { Formik, Field, Form } from 'formik';
+import { Formik, Field } from 'formik';
+import * as Yup from 'yup';
+import {
+  Button,
+  ErrMessage,
+  StyledForm,
+  StyledLabel,
+} from './ContactForm.styled';
 
-export const ContactForm = ({ name, number, onAddContacts }) => {
-  console.log(name);
+const formSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'To short')
+    .max(15, 'To long')
+    .required('* This field required'),
+  number: Yup.number().required('* This field required'),
+});
 
+export const ContactForm = ({ onAddContacts }) => {
   return (
     <Formik
       initialValues={{
-        name: 'maxim',
-        number: '956509806',
+        name: '',
+        number: '',
       }}
+      validationSchema={formSchema}
       onSubmit={(values, actions) => {
         onAddContacts(values);
-        console.log(values);
         actions.resetForm();
       }}
     >
-      <Form>
-        <label>
-          Name
-          <Field type="text" name="name"></Field>
-        </label>
-        <label>
-          Number
-          <Field type="tel" name="number"></Field>
-        </label>
-        <button type="submit">Add contact</button>
-      </Form>
+      <StyledForm>
+        <StyledLabel htmlFor="name">Name</StyledLabel>
+        <Field type="text" name="name" placeholder="Enter name..."></Field>
+        <ErrMessage component="span" name="name" />
+
+        <StyledLabel htmlFor="name">Number</StyledLabel>
+        <Field
+          type="tel"
+          name="number"
+          placeholder="Enter phone number..."
+        ></Field>
+        <ErrMessage component="span" name="number" />
+
+        <Button type="submit">Add contact</Button>
+      </StyledForm>
     </Formik>
   );
 };

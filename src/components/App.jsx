@@ -2,31 +2,64 @@ import React, { Component } from 'react';
 import { ContactForm } from './ContactForm/ContactForm';
 import { nanoid } from 'nanoid';
 import { ContactList } from './ContactList/ContactList';
+import { Filter } from './Filter/Filter';
+import { GlobeWrap, Wrapper } from './App.styled';
 
 export class App extends Component {
   state = {
     contacts: [],
-    name: '',
-    number: '',
+    filter: '',
   };
-  onAddContacts = contact => {
+  addContacts = objContact => {
+    if (this.state.contacts.some(contact => contact.name === objContact.name)) {
+      alert(`${objContact.name} is already in the phone book`);
+      return;
+    }
     this.setState(prevState => ({
-      contacts: [...prevState.contacts, { ...contact, id: nanoid(5) }],
+      contacts: [...prevState.contacts, { ...objContact, id: nanoid(5) }],
+    }));
+  };
+  changeFilter = value => {
+    this.setState({
+      filter: value,
+    });
+  };
+
+  getFilteredContacts = () => {
+    const { filter, contacts } = this.state;
+    if (filter !== '') {
+      return contacts.filter(({ name }) => {
+        const filterValue = filter.toLowerCase();
+        const filteredContacts = name.toLowerCase().includes(filterValue);
+        return filteredContacts;
+      });
+    } else {
+      return contacts;
+    }
+  };
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
     }));
   };
 
   render() {
-    console.log(this.state.contacts);
+    const filteredContacts = this.getFilteredContacts();
     return (
-      <>
-        <ContactForm
-          name={this.state.name}
-          number={this.state.number}
-          contacts={this.state.contacts}
-          onAddContacts={this.onAddContacts}
-        />
-        <ContactList contacts={this.state.contacts}/>
-      </>
+      <GlobeWrap>
+        <Wrapper>
+          <h1>Phonebook</h1>
+          <ContactForm onAddContacts={this.addContacts} />
+        </Wrapper>
+        <Wrapper>
+          <h2>Contacts</h2>
+          <Filter onChangeFilter={this.changeFilter} />
+          <ContactList
+            contacts={filteredContacts}
+            onDelete={this.deleteContact}
+          />
+        </Wrapper>
+      </GlobeWrap>
     );
   }
 }
